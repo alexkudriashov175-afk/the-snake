@@ -14,7 +14,7 @@ GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 # Начальная позиция объектов:
 START_POSITION = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
-# Палитра цветоы:
+# Палитра цветов:
 COLORS = {
     'background': (0, 0, 0),
     'border': (93, 216, 228),
@@ -57,8 +57,8 @@ class GameObject:
     def draw(self):
         """Отрисовка объекта. Переопределяется в дочерних классах."""
         raise NotImplementedError(
-            f'Метод draw не переопределён в классе '
-            f'{self.__class__.__name__}'
+            f'Метод draw не переопределён '
+            f'в классе {self.__class__.__name__}'
         )
 
     def draw_cell(self, position, border_color=COLORS['border']):
@@ -123,11 +123,10 @@ class Snake(GameObject):
             (head_y + dy * GRID_SIZE) % SCREEN_HEIGHT,
         )
         self.positions.insert(0, new_head)
-        self.last = (
-            self.positions.pop()
-            if len(self.positions) > self.length
-            else None
-        )
+        if len(self.positions) > self.length:
+            self.last = self.positions.pop()
+        else:
+            self.last = None
 
     def reset(self):
         """Возвращает змейку в начальное состояние."""
@@ -183,11 +182,12 @@ def main():
         snake.move()
 
         # Столкновение с собой или поедание яблока.
-        if snake.get_head_position() in snake.positions[1:]:
+        head = snake.get_head_position()
+        if head in snake.positions[1:]:
             snake.reset()
             apple.randomize_position(snake.positions)
             screen.fill(COLORS['background'])
-        elif snake.get_head_position() == apple.position:
+        elif head == apple.position:
             snake.length += 1
             apple.randomize_position(snake.positions)
 
