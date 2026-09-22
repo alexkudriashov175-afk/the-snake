@@ -14,9 +14,12 @@ GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 # Начальная позиция объектов:
 START_POSITION = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
+# Цвет фона игрового поля:
+BOARD_BACKGROUND_COLOR = (0, 0, 0)
+
 # Палитра цветов:
 COLORS = {
-    'background': (0, 0, 0),
+    'background': BOARD_BACKGROUND_COLOR,
     'border': (93, 216, 228),
     'apple': (255, 0, 0),
     'snake': (0, 255, 0),
@@ -54,18 +57,12 @@ class GameObject:
         self.position = position
         self.body_color = body_color
 
-    def draw(self):
+    def draw(self, surface):
         """Отрисовка объекта. Переопределяется в дочерних классах."""
         raise NotImplementedError(
             f'Метод draw не переопределён '
             f'в классе {self.__class__.__name__}'
         )
-
-    def draw_cell(self, position, border_color=COLORS['border']):
-        """Рисует одну клетку с границей по указанной позиции."""
-        rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
-        pg.draw.rect(screen, self.body_color, rect)
-        pg.draw.rect(screen, border_color, rect, 1)
 
 
 class Apple(GameObject):
@@ -91,9 +88,11 @@ class Apple(GameObject):
             if self.position not in occupied_cells:
                 return
 
-    def draw(self):
+    def draw(self, surface):
         """Рисует яблоко квадратом размером в одну клетку."""
-        self.draw_cell(self.position)
+        rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pg.draw.rect(surface, self.body_color, rect)
+        pg.draw.rect(surface, COLORS['border'], rect, 1)
 
 
 class Snake(GameObject):
@@ -136,13 +135,17 @@ class Snake(GameObject):
         self.next_direction = None
         self.last = None
 
-    def draw(self):
+    def draw(self, surface):
         """Рисует голову и хвост змейки, стирая след."""
         if self.last:
             last_rect = pg.Rect(self.last, (GRID_SIZE, GRID_SIZE))
-            pg.draw.rect(screen, COLORS['background'], last_rect)
+            pg.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
 
-        self.draw_cell(self.positions[0])
+        head_rect = pg.Rect(
+            self.positions[0], (GRID_SIZE, GRID_SIZE)
+        )
+        pg.draw.rect(surface, self.body_color, head_rect)
+        pg.draw.rect(surface, COLORS['border'], head_rect, 1)
 
 
 def handle_keys(game_object):
@@ -172,7 +175,7 @@ def main():
     snake = Snake()
     apple = Apple(occupied_cells=snake.positions)
 
-    screen.fill(COLORS['background'])
+    screen.fill(BOARD_BACKGROUND_COLOR)
 
     while True:
         clock.tick(SPEED)
@@ -181,18 +184,17 @@ def main():
         snake.update_direction()
         snake.move()
 
-        # Столкновение с собой или поедание яблока.
         head = snake.get_head_position()
         if head in snake.positions[1:]:
             snake.reset()
             apple.randomize_position(snake.positions)
-            screen.fill(COLORS['background'])
+            screen.fill(BOARD_BACKGROUND_COLOR)
         elif head == apple.position:
             snake.length += 1
             apple.randomize_position(snake.positions)
 
-        apple.draw()
-        snake.draw()
+        apple.draw(screen)
+        snake.draw(screen)
 
         pg.display.update()
 
