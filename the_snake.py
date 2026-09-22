@@ -14,7 +14,7 @@ GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 # Начальная позиция объектов:
 START_POSITION = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
-# Палитра цветов:
+# Палитра цветоы:
 COLORS = {
     'background': (0, 0, 0),
     'border': (93, 216, 228),
@@ -45,8 +45,11 @@ clock = pg.time.Clock()
 class GameObject:
     """Базовый игровой объект."""
 
-    def __init__(self, position=START_POSITION,
-                 body_color=COLORS['default']):
+    def __init__(
+        self,
+        position=START_POSITION,
+        body_color=COLORS['default'],
+    ):
         """Задаёт позицию и цвет объекта."""
         self.position = position
         self.body_color = body_color
@@ -68,8 +71,11 @@ class GameObject:
 class Apple(GameObject):
     """Яблоко — игровой объект размером в одну клетку."""
 
-    def __init__(self, occupied_cells=None,
-                 body_color=COLORS['apple']):
+    def __init__(
+        self,
+        occupied_cells=None,
+        body_color=COLORS['apple'],
+    ):
         """Создаёт яблоко в случайной свободной клетке."""
         super().__init__(body_color=body_color)
         self.randomize_position(occupied_cells)
